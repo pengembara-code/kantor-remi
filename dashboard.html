@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Pemakaian AI</title>
+    <style>
+        :root {
+            --bg-color: #0f1016;
+            --card-bg: #181926;
+            --card-border: #232538;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.2);
+            --accent-blue: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #181926 0%, #1e1b4b 100%);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 20px var(--primary-glow);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .update-time {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .filter-container {
+            margin-top: 0.5rem;
+        }
+
+        select {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 1.25rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 1.25rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+
+        .canvas-container.tall {
+            height: 250px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .table-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 1.25rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge.success {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge.danger {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app-container">
+        <header>
+            <h1>Monitor Pemakaian AI</h1>
+            <div class="update-time" id="update-time">Terakhir diperbarui: -</div>
+            <div class="filter-container">
+                <select id="provider-filter" onchange="renderDashboard()">
+                    <option value="all">Semua Provider</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="google-ai-studio">Google AI Studio</option>
+                </select>
+            </div>
+        </header>
+
+        <div id="content-area">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Pertanyaan</span>
+                    <span class="stat-value" id="stat-total">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Berhasil</span>
+                    <span class="stat-value" id="stat-success" style="color: var(--success);">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Gagal (%)</span>
+                    <span class="stat-value" id="stat-failed" style="color: var(--danger);">0 (0%)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Rata-rata Latency</span>
+                    <span class="stat-value" id="stat-latency">0s</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Total Karakter</span>
+                    <span class="stat-value" id="stat-chars">0</span>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Pemakaian per Model</div>
+                    <div class="canvas-container">
+                        <canvas id="chart-models"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Status Keberhasilan</div>
+                    <div class="canvas-container">
+                        <canvas id="chart-status"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card full-width">
+                    <div class="chart-title">Latency per Panggilan (Detik)</div>
+                    <div class="canvas-container tall">
+                        <canvas id="chart-latency"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-card">
+                <div class="chart-title" style="margin-bottom: 1rem;">Riwayat Pemakaian</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Provider</th>
+                            <th>Model</th>
+                            <th>Status</th>
+                            <th>Latency</th>
+                            <th>Error</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Data inserted via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USAGE_DATA = [
+            {
+                        "ts": "2026-09-29T04:07:04",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 3.8,
+                        "prompt_chars": 35,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:07:05",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": true,
+                        "latency_s": 1.0,
+                        "prompt_chars": 35,
+                        "reply_chars": 5,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:07:32",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 22.3,
+                        "prompt_chars": 35,
+                        "reply_chars": 6,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:08:20",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 37.0,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:08:44",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": false,
+                        "latency_s": 24.9,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:08:45",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 0.5,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:08:45",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-31b-it:free",
+                        "ok": false,
+                        "latency_s": 0.4,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:09:42",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3.5-lightning:free",
+                        "ok": false,
+                        "latency_s": 56.2,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:09:42",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-26b-a4b-it:free",
+                        "ok": false,
+                        "latency_s": 0.3,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:12:32",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 37.4,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:12:33",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": false,
+                        "latency_s": 0.9,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "KeyError"
+            },
+            {
+                        "ts": "2026-09-29T04:13:35",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 61.6,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T04:13:35",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-31b-it:free",
+                        "ok": false,
+                        "latency_s": 0.5,
+                        "prompt_chars": 1329,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:14:01",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3.5-lightning:free",
+                        "ok": true,
+                        "latency_s": 25.7,
+                        "prompt_chars": 1329,
+                        "reply_chars": 225,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:14:30",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 22.6,
+                        "prompt_chars": 1329,
+                        "reply_chars": 20452,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:23:27",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 17.0,
+                        "prompt_chars": 2293,
+                        "reply_chars": 15877,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:27:49",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": false,
+                        "latency_s": 1.3,
+                        "prompt_chars": 9,
+                        "reply_chars": 0,
+                        "error": "HTTP 503"
+            },
+            {
+                        "ts": "2026-09-29T04:28:08",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 15.8,
+                        "prompt_chars": 19,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 1.2,
+                        "prompt_chars": 10,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": true,
+                        "latency_s": 1.2,
+                        "prompt_chars": 10,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3.5-lightning:free",
+                        "ok": true,
+                        "latency_s": 1.2,
+                        "prompt_chars": 10,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 0.8,
+                        "prompt_chars": 10,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-31b-it:free",
+                        "ok": false,
+                        "latency_s": 0.8,
+                        "prompt_chars": 10,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T04:28:59",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-26b-a4b-it:free",
+                        "ok": false,
+                        "latency_s": 0.8,
+                        "prompt_chars": 10,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            }
+];;
+
+        function shortenModelName(fullName) {
+            if (!fullName) return '-';
+            const parts = fullName.split('/');
+            let name = parts[parts.length - 1];
+            if (name.length > 25) {
+                name = name.substring(0, 22) + '...';
+            }
+            return name;
+        }
+
+        function formatDate(tsStr) {
+            if (!tsStr) return '-';
+            const date = new Date(tsStr);
+            return isNaN(date.getTime()) ? tsStr : date.toLocaleString('id-ID', {
+                dateStyle: 'medium',
+                timeStyle: 'medium'
+            });
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('content-area');
+            const updateTimeEl = document.getElementById('update-time');
+            
+            const now = new Date();
+            updateTimeEl.innerText = `Terakhir diperbarui: ${now.toLocaleString('id-ID')}`;
+
+            if (!USAGE_DATA || USAGE_DATA.length === 0) {
+                container.innerHTML = `<div class="empty-state">Belum ada data pemakaian AI.</div>`;
+                return;
+            }
+
+            const selectedProvider = document.getElementById('provider-filter').value;
+            const filteredData = selectedProvider === 'all' 
+                ? USAGE_DATA 
+                : USAGE_DATA.filter(d => d.provider === selectedProvider);
+
+            if (filteredData.length === 0) {
+                container.innerHTML = `<div class="empty-state">Tidak ada data untuk provider "${selectedProvider}".</div>`;
+                return;
+            }
+
+            // Restore HTML structure if it was replaced by empty state
+            if (!document.getElementById('stat-total')) {
+                location.reload(); // Simple recovery if filter toggled from empty state
+                return;
+            }
+
+            // 1. Stats Calculation
+            const total = filteredData.length;
+            const successCount = filteredData.filter(d => d.ok).length;
+            const failedCount = total - successCount;
+            const failedPercent = ((failedCount / total) * 100).toFixed(1);
+            
+            const totalLatency = filteredData.reduce((acc, curr) => acc + (curr.latency_s || 0), 0);
+            const avgLatency = (totalLatency / total).toFixed(2);
+
+            const totalChars = filteredData.reduce((acc, curr) => acc + (curr.prompt_chars || 0) + (curr.reply_chars || 0), 0);
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-success').innerText = successCount;
+            document.getElementById('stat-failed').innerText = `${failedCount} (${failedPercent}%)`;
+            document.getElementById('stat-latency').innerText = `${avgLatency}s`;
+            document.getElementById('stat-chars').innerText = totalChars.toLocaleString('id-ID');
+
+            // 2. Table Render
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = filteredData.map(d => `
+                <tr>
+                    <td>${formatDate(d.ts)}</td>
+                    <td>${d.provider || '-'}</td>
+                    <td title="${d.model}">${shortenModelName(d.model)}</td>
+                    <td><span class="badge ${d.ok ? 'success' : 'danger'}">${d.ok ? 'Berhasil' : 'Gagal'}</span></td>
+                    <td>${d.latency_s}s</td>
+                    <td style="color: var(--danger);">${d.error || '-'}</td>
+                </tr>
+            `).join('');
+
+            // 3. Render Custom Charts
+            renderModelChart(filteredData);
+            renderStatusChart(successCount, failedCount);
+            renderLatencyChart(filteredData);
+        }
+
+        // --- Canvas Drawing Helpers ---
+
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            return { ctx, width: rect.width, height: rect.height };
+        }
+
+        function renderModelChart(data) {
+            const canvas = document.getElementById('chart-models');
+            const { ctx, width, height } = setupCanvas(canvas);
+            ctx.clearRect(0, 0, width, height);
+
+            // Aggregate by model
+            const counts = {};
+            data.forEach(d => {
+                const m = shortenModelName(d.model);
+                counts[m] = (counts[m] || 0) + 1;
+            });
+
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+            const maxVal = Math.max(...values, 1);
+
+            const padding = { top: 10, bottom: 10, left: 100, right: 30 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const barHeight = Math.min(24, chartHeight / labels.length - 8);
+
+            labels.forEach((label, i) => {
+                const val = values[i];
+                const y = padding.top + i * (chartHeight / labels.length) + 10;
+                const barWidth = (val / maxVal) * chartWidth;
+
+                // Label
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '12px system-ui';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, padding.left - 10, y + barHeight / 2);
+
+                // Bar Background
+                ctx.fillStyle = '#232538';
+                ctx.beginPath();
+                ctx.roundRect(padding.left, y, chartWidth, barHeight, 4);
+                ctx.fill();
+
+                // Bar Fill
+                ctx.fillStyle = '#8b5cf6';
+                ctx.beginPath();
+                ctx.roundRect(padding.left, y, Math.max(barWidth, 4), barHeight, 4);
+                ctx.fill();
+
+                // Value Text
+                ctx.fillStyle = '#f1f5f9';
+                ctx.textAlign = 'left';
+                ctx.fillText(val, padding.left + barWidth + 8, y + barHeight / 2);
+            });
+        }
+
+        function renderStatusChart(success, failed) {
+            const canvas = document.getElementById('chart-status');
+            const { ctx, width, height } = setupCanvas(canvas);
+            ctx.clearRect(0, 0, width, height);
+
+            const total = success + failed;
+            if (total === 0) return;
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(centerX, centerY) - 20;
+            const innerRadius = radius * 0.6;
+
+            const successAngle = (success / total) * 2 * Math.PI;
+            
+            // Draw Success Arc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + successAngle);
+            ctx.arc(centerX, centerY, innerRadius, -Math.PI / 2 + successAngle, -Math.PI / 2, true);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+
+            // Draw Failed Arc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2 + successAngle, -Math.PI / 2 + 2 * Math.PI);
+            ctx.arc(centerX, centerY, innerRadius, -Math.PI / 2 + 2 * Math.PI, -Math.PI / 2 + successAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+
+            // Legend / Center Text
+            ctx.fillStyle = '#f1f5f9';
+            ctx.font = 'bold 16px system-ui';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${total} Total`, centerX, centerY - 8);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '12px system-ui';
+            ctx.fillText(`${((success/total)*100).toFixed(0)}% Sukses`, centerX, centerY + 12);
+        }
+
+        function renderLatencyChart(data) {
+            const canvas = document.getElementById('chart-latency');
+            const { ctx, width, height } = setupCanvas(canvas);
+            ctx.clearRect(0, 0, width, height);
+
+            if (data.length === 0) return;
+
+            const padding = { top: 20, bottom: 30, left: 40, right: 20 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            const latencies = data.map(d => d.latency_s || 0);
+            const maxVal = Math.max(...latencies, 1);
+            const minVal = 0;
+
+            // Draw Grid Lines
+            ctx.strokeStyle = '#232538';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 3; i++) {
+                const y = padding.top + (chartHeight / 3) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+
+                // Axis label
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px system-ui';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                const valLabel = (maxVal - (maxVal / 3) * i).toFixed(1);
+                ctx.fillText(valLabel + 's', padding.left - 8, y);
+            }
+
+            // Points & Line Path
+            const points = latencies.map((val, i) => {
+                const x = padding.left + (i / (latencies.length - 1 || 1)) * chartWidth;
+                const y = padding.top + chartHeight - ((val - minVal) / (maxVal - minVal || 1)) * chartHeight;
+                return { x, y };
+            });
+
+            // Draw Line
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            points.forEach((p, i) => {
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+
+            // Draw Dots
+            points.forEach(p => {
+                ctx.fillStyle = '#181926';
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            });
+        }
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', renderDashboard);
+        window.addEventListener('resize', renderDashboard);
+    </script>
+</body>
+</html>
