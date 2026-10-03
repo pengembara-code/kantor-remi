@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Monitor — Semua Model AI-ku</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#273449;--txt:#e2e8f0;--muted:#94a3b8;--hijau:#22c58e;--kuning:#facc15;--merah:#ef4444;--ungu:#8b5cf6;--accent:#38bdf8;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:auto;--tw-font-smoothing:antialiased;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,'Noto Sans',sans-serif;background:linear-gradient(160deg,#0f172a 0%,#111827 100%);color:var(--txt);padding:16px;min-height:100vh;}
+  .wrap{max-width:1180px;margin:0 auto;}
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;14px;margin-bottom:20px;}
+  header h1{font-size:1.5rem;font-weight:700;background:linear-gradient(90deg,var(--ungu),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  header .sub{color:var(--muted);font-size:.85rem}
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+  .s-card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 4px 12px rgba(0,0,0,.25);}
+  .s-card .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+  .s-card .v{font-size:1.6rem;font-weight:700}
+  .section-title{font-size:1.05rem;font-weight:600;margin:18px 0 12px;color:#cbd5e1}
+  .providers{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
+  .p-card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,.22);border-left:5px solid var(--muted);}
+  .p-card.ok{border-left-color:var(--hijau)}
+  .p-card.warn{border-left-color:var(--kuning)}
+  .p-card.err{border-left-color:var(--merah)}
+  .p-card.aktif{border-left-color:var(--ungu)}
+  .p-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+  .p-name{font-size:.95rem;font-weight:600}
+  .badge{font-size:.7rem;padding:3px 9px;border-radius:999px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  .badge.ok{background:rgba(34,197,142,.15);color:var(--hijau)}
+  .badge.warn{background:rgba(250,204,21,.15);color:var(--kuning)}
+  .badge.err{background:rgba(239,68,68,.15);color:var(--merah)}
+  .badge.aktif{background:rgba(139,92,246,.15);color:var(--ungu)}
+  .p-row{display:flex;justify-content:space-between;font-size:.82rem;margin:4px 0;color:#cbd5e1}
+  .p-row .val{color:#f1f5f9;font-weight:500}
+  .chart-bg{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px}
+  .bar-label{font-size:.72rem;color:var(--muted);margin-top:4px;text-align:center;word-break:keep-all}
+  .bars-row{display:flex;align-items:flex-end;gap:8px;height:160px}
+  .bar{flex:1;min-width:24px;background:linear-gradient(180deg,var(--hijau),#16a34a);border-radius:6px 6px 0 0;position:relative;min-height:4px;transition:height .3s}
+  .bar.g{background:linear-gradient(180deg,var(--accent),#0284c7)}
+  .bar.m{width:100%;background:var(--card2);border-radius:6px}
+  .bar-val{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:.68rem;color:var(--muted)}
+  .hlist{display:flex;flex-direction:column;gap:8px}
+  .hbar{height:18px;border-radius:6px;background:var(--card2);position:relative}
+  .hbar>span{display:inline-block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--ungu),#6d28d9)}
+  .hbar-name{font-size:.75rem;color:var(--muted);width:160px;min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--card2)}
+  th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.72rem}
+  td{color:#cbd5e1}
+  .err-msg{color:var(--merah);font-size:.8rem}
+  .actions{display:flex;gap:10px;align-items:center;flex-wrap:gap 10px}
+  button{border:none;cursor:pointer;border-radius:10px;padding:9px 16px;font-size:.85rem;font-weight:600;transition:.15s}
+  .btn-refresh{background:linear-gradient(90deg,var(--ungu),var(--accent));color:#fff}
+  .btn-refresh:hover{opacity:.92}
+  .livebadge{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--kuning)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--kuning);display:inline-block}
+  .loading{color:var(--muted)}
+  footer{color:var(--muted);font-size:.75rem;text-align:center;margin-top:24px}
+  @media(max-width:640px){header h1{font-size:1.25rem}.s-card .v{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Model Monitor</h1>
+      <div class="sub">Pantauan pakai &amp; kuota semua model AI-ku</div>
+    </div>
+    <div class="actions">
+      <span class="livebadge"><span class="dot"></span><span id="live">Menyegarkan otomatis tiap 5 menit</span></span>
+      <span style="font-size:12px;color:var(--muted)">📸 Snapshot statis — data per 3 Okt 2026</span><button class="btn-refresh" id="refreshBtn" style="display:none">Segarkan sekarang</button>
+    </div>
+  </header>
+
+  <div class="summary" id="summary"></div>
+  <div class="section-title">Provider &amp; Kuota</div>
+  <div class="providers" id="providers"></div>
+
+  <div class="section-title">Grafik: usage 7 hari terakhir</div>
+  <div class="chart-bg">
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">Token (perkiraan) per hari</div>
+    <div class="bars-row" id="dailyChart"></div>
+  </div>
+
+  <div class="section-title">Grafik: top 5 model (token)</div>
+  <div class="chart-bg">
+    <div class="hlist" id="modelChart"></div>
+  </div>
+
+  <div class="section-title">Riwayat error (terbaru)</div>
+  <div style="overflow-x:auto">
+    <table id="errorsTable">
+      <thead><tr><th>Waktu</th><th>Model</th><th>Error</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <footer>
+    <div>Model Monitor · data realtime dari usage.jsonl + API eksternal</div>
+    <div id="meta" class="loading"></div>
+  </footer>
+</div>
+
+<script>
+<script>window.__SNAPSHOT__ = {"generated_at": "2026-10-03 12:41:51", "summary": {"today_requests": 0, "week_tokens": 21659, "active_providers": 6, "usage_error": null}, "providers": [{"name": "OpenRouter", "key": "openrouter", "requests": 43, "ok": 14, "success_rate": 32.6, "tokens": 10482, "quota": "limit 50, sisa 49.9956, terpakai 0.00435, free tier", "status": "ok", "status_text": "Terhubung (200)"}, {"name": "CleanAPIs", "key": "cleanapis", "requests": 0, "ok": 0, "success_rate": null, "tokens": 0, "quota": "5.000.000 token/bulan (free tier, sisa: tidak tersedia)", "status": "ok", "status_text": "Terhubung (200)"}, {"name": "Google AI Studio", "key": "google-ai-studio", "requests": 14, "ok": 13, "success_rate": 92.9, "tokens": 11176, "quota": "tidak tersedia", "status": "ok", "status_text": "Terhubung (200)"}, {"name": "9Router / Bariska", "key": "9router", "requests": 0, "ok": 0, "success_rate": null, "tokens": 0, "quota": "cek manual", "status": "manual", "status_text": "cek manual (layanan mungkin mati)"}, {"name": "Muse", "key": "muse", "requests": 0, "ok": 0, "success_rate": null, "tokens": 0, "quota": "The user does not have a subscription.\nUsage: 56% of free weekly limit.\nWeekly limit resets Oct 5 at 4:24 PM WIB\nAdditional tokens: 0% used (1B tokens left)", "status": "ok", "status_text": "Terhubung"}, {"name": "Nous / Hermes Agent", "key": "nous", "requests": 0, "ok": 0, "success_rate": null, "tokens": 0, "quota": "Aktif (gratis, tanpa kuota token)", "status": "aktif", "status_text": "Aktif (gratis, tanpa kuota)"}, {"name": "Jev", "key": "jev", "requests": 0, "ok": 0, "success_rate": null, "tokens": 0, "quota": "Aktif (gratis, tanpa kuota token — lapisan routing)", "status": "aktif", "status_text": "Aktif (routing layer)"}], "daily": [{"day": "2026-09-27", "requests": 0, "tokens": 0}, {"day": "2026-09-28", "requests": 0, "tokens": 0}, {"day": "2026-09-29", "requests": 57, "tokens": 21659}, {"day": "2026-09-30", "requests": 0, "tokens": 0}, {"day": "2026-10-01", "requests": 0, "tokens": 0}, {"day": "2026-10-02", "requests": 0, "tokens": 0}, {"day": "2026-10-03", "requests": 0, "tokens": 0}], "top_models": [{"model": "gemini-3.5-flash-lite", "requests": 14, "tokens": 11176}, {"model": "nvidia/nemotron-3-ultra-550b-a55b:free", "requests": 15, "tokens": 4320}, {"model": "nvidia/nemotron-3-super-120b-a12b:free", "requests": 8, "tokens": 2106}, {"model": "nvidia/nemotron-3.5-lightning:free", "requests": 5, "tokens": 1138}, {"model": "qwen/qwen3.8-27b:free", "requests": 6, "tokens": 1087}], "errors": [{"model": "google/gemma-4-26b-a4b-it:free", "ts": "2026-09-29T22:27:09", "error": "RemoteDisconnected"}, {"model": "nvidia/nemotron-3.5-lightning:free", "ts": "2026-09-29T22:27:09", "error": "IncompleteRead"}, {"model": "google/gemma-4-31b-it:free", "ts": "2026-09-29T22:26:49", "error": "HTTP 429"}, {"model": "qwen/qwen3.8-27b:free", "ts": "2026-09-29T22:26:49", "error": "HTTP 429"}, {"model": "nvidia/nemotron-3-super-120b-a12b:free", "ts": "2026-09-29T22:26:49", "error": "IncompleteRead"}, {"model": "nvidia/nemotron-3-ultra-550b-a55b:free", "ts": "2026-09-29T22:26:35", "error": "IncompleteRead"}, {"model": "nvidia/nemotron-3-ultra-550b-a55b:free", "ts": "2026-09-29T15:19:44", "error": "IncompleteRead"}, {"model": "qwen/qwen3.8-27b:free", "ts": "2026-09-29T22:19:29", "error": "HTTP 429"}, {"model": "google/gemma-4-26b-a4b-it:free", "ts": "2026-09-29T15:11:39", "error": "HTTP 429"}, {"model": "nvidia/nemotron-3.5-lightning:free", "ts": "2026-09-29T15:11:39", "error": "IncompleteRead"}], "total_lines": 57, "usage_error": null};</script>
+const API='/api/snapshot';
+function fmtNum(n){if(n==null||n===0)return '0';return Number(n).toLocaleString('id-ID');}
+function badgeClass(s){return s==='ok'?'ok':s==='manual'||s==='peringatan'?'warn':s==='aktif'?'aktif':'err';}
+
+function renderSummary(s){
+  const items=[
+    ['Request hari ini', fmtNum(s.today_requests)],
+    ['Token minggu ini (est)', fmtNum(s.week_tokens)],
+    ['Provider aktif', fmtNum(s.active_providers)]
+  ];
+  document.getElementById('summary').innerHTML=items.map(([k,v])=>{
+    return `<div class="s-card"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+  }).join('');
+}
+
+function renderProviders(ps){
+  document.getElementById('providers').innerHTML=ps.map(p=>{
+    const sr=p.success_rate;
+    const srTxt= (sr===null||sr===undefined)?'<span style="color:var(--muted)">—</span>':`<span class="val">${sr}%</span>`;
+    return `<div class="p-card ${badgeClass(p.status)}">
+      <div class="p-head"><span class="p-name">${p.name}</span><span class="badge ${badgeClass(p.status)}">${p.status}</span></div>
+      <div class="p-row"><span>Total request</span><span class="val">${fmtNum(p.requests)}</span></div>
+      <div class="p-row"><span>Success rate</span>${srTxt}</div>
+      <div class="p-row"><span>Est. token</span><span class="val">${fmtNum(p.tokens)}</span></div>
+      <div class="p-row"><span>Sisa kuota</span><span class="val" style="font-size:.75rem">${p.quota||'—'}</span></div>
+      <div class="p-row"><span>Status</span><span class="val">${p.status_text}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderDaily(d){
+  const maxTok=Math.max(...d.map(x=>x.tokens),1);
+  const maxReq=Math.max(...d.map(x=>x.requests),1);
+  document.getElementById('dailyChart').innerHTML=d.map(x=>{
+    const hTok=x.tokens?Math.round(x.tokens/maxTok*100):2;
+    const hReq=x.requests?Math.round(x.requests/maxReq*100):2;
+    const dayStr=x.day.replace(/^\d{4}-\d{2}-/,'');
+    return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:30px">
+      <div style="width:100%;display:flex;align-items:flex-end;gap:2px;height:110px">
+        <div class="bar" style="height:${hTok}%;background:linear-gradient(180deg,var(--hijau),#16a34a)" title="token ${fmtNum(x.tokens)}"></div>
+        <div class="bar g" style="height:${hReq}%;background:linear-gradient(180deg,var(--accent),#0284c7)" title="request ${fmtNum(x.requests)}"></div>
+      </div>
+      <div class="bar-label">${dayStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderModels(ms){
+  const mc=document.getElementById('modelChart');
+  if(!ms||!ms.length){mc.innerHTML='<div style="color:var(--muted);font-size:.78rem">belum ada data model</div>';return;}
+  const maxT=Math.max(...ms.map(x=>x.tokens),1);
+  mc.innerHTML=ms.map(x=>{
+    const pct=x.tokens/maxT*100;
+    return `<div class="hbar" style="display:grid;grid-template-columns:160px 1fr;align-items:center;gap:8px">
+      <div class="hbar-name" title="${x.model}">${x.model}</div>
+      <div style="position:relative">
+        <div class="hbar"><span style="width:${pct}%"></span></div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:2px">${fmtNum(x.requests)} req • ${fmtNum(x.tokens)} tok</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderErrors(errs){
+  const tb=document.querySelector('#errorsTable tbody');
+  if(!errs||!errs.length){tb.innerHTML='<tr><td colspan="3" style="color:var(--muted)">Tidak ada error tercatat</td></tr>';return;}
+  tb.innerHTML=errs.map(e=>`<tr><td>${e.ts||'—'}</td><td>${e.model||'?'}</td><td><span class="err-msg">${e.error||'error'}</span></td></tr>`).join('');
+}
+
+let refreshing=false;
+async function refresh(){
+  if(refreshing) return;
+  refreshing=true;
+  try{
+    const d=window.__SNAPSHOT__;
+    if(d.usage_error){/* ok */}
+    renderSummary(d.summary);
+    renderProviders(d.providers);
+    renderDaily(d.daily);
+    renderModels(d.top_models);
+    renderErrors(d.errors);
+    document.getElementById('meta').textContent=`Terakhir update: ${d.generated_at} · ${d.total_lines} log · sumber: ${d.usage_error||'OK'}`;
+  }catch(e){
+    document.getElementById('meta').innerHTML='<span class="err-msg">Gagal ambil data: '+e.message+'</span>';
+  }finally{
+    refreshing=false;
+    document.getElementById('refreshBtn').textContent='Segarkan sekarang';
+  }
+}
+
+refresh();
+// snapshot statis: auto-refresh dimatikan
+</script>
+</body>
+</html>
