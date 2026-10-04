@@ -758,57 +758,21 @@ function symbolSprite(txt,color,size=1){
   s.scale.set(size,size,1);return s;
 }
 
-// ===== KARAKTER CHIBI IMUT =====
-function makeChibi(colorHex,isManager=false){
-  const g=new THREE.Group();
-  const refs={};
-  const cm=new THREE.MeshStandardMaterial({color:colorHex,roughness:.55});
-  const s=isManager?1.25:1;
-  // badan
+// ===== KARAKTER CHIBI IMUT (karyawan) =====
+// wajah asli dimuat sekali, dipakai maskot
+const REMI_TEX=new THREE.TextureLoader().load('remi-face.png');
+REMI_TEX.colorSpace=THREE.SRGBColorSpace;
+const MOCHI_TEX=new THREE.TextureLoader().load('mochi-face.png');
+MOCHI_TEX.colorSpace=THREE.SRGBColorSpace;
+
+function chibiBody(g,refs,cm,s,withTie){
   const body=new THREE.Mesh(new THREE.CapsuleGeometry(.34*s,.42*s,6,14),cm);
   body.position.y=.62*s;body.castShadow=true;g.add(body);refs.body=body;
-  // dasi manager
-  if(isManager){
+  if(withTie){
     const tie=new THREE.Mesh(new THREE.BoxGeometry(.12,.3,.06),
       new THREE.MeshStandardMaterial({color:0xfee440,roughness:.5}));
     tie.position.set(0,.72*s,.36*s);g.add(tie);
   }
-  // kepala
-  const headG=new THREE.Group();headG.position.y=1.32*s;g.add(headG);refs.head=headG;
-  const head=new THREE.Mesh(new THREE.SphereGeometry(.44*s,24,20),M.skin);
-  head.castShadow=true;headG.add(head);
-  // mata: kiri bulat, kanan kedip — ciri khas Remi 😉
-  const eyeG=new THREE.SphereGeometry(.07*s,12,10);
-  const eL=new THREE.Mesh(eyeG,M.black);eL.position.set(-.16*s,.06*s,.38*s);headG.add(eL);
-  const wink=new THREE.Mesh(new THREE.TorusGeometry(.06*s,.018*s,8,12,Math.PI),M.black);
-  wink.position.set(.17*s,.06*s,.385*s);wink.rotation.z=-Math.PI/2;headG.add(wink);
-  refs.eyeL=eL;refs.eyeR=wink;
-  // blush
-  const blG=new THREE.SphereGeometry(.055*s,10,8);
-  const bL=new THREE.Mesh(blG,M.pink);bL.position.set(-.28*s,-.08*s,.33*s);bL.scale.z=.4;headG.add(bL);
-  const bR=new THREE.Mesh(blG,M.pink);bR.position.set(.28*s,-.08*s,.33*s);bR.scale.z=.4;headG.add(bR);
-  // mulut (senyum)
-  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.09*s,.022*s,8,14,Math.PI),
-    M.black);
-  mouth.position.set(0,-.14*s,.4*s);mouth.rotation.x=Math.PI;headG.add(mouth);refs.mouth=mouth;
-  // rambut pink khas Remi 💗
-  const hairM=new THREE.MeshStandardMaterial({color:0xff8fc7,roughness:.55});
-  const hairBack=new THREE.Mesh(new THREE.SphereGeometry(.46*s,20,16),hairM);
-  hairBack.position.set(0,.04*s,-.18*s);hairBack.scale.set(1,1.08,.8);
-  hairBack.castShadow=true;headG.add(hairBack);
-  const hairTop=new THREE.Mesh(
-    new THREE.SphereGeometry(.47*s,24,14,0,Math.PI*2,0,Math.PI*.5),hairM);
-  hairTop.position.set(0,.09*s,-.02*s);hairTop.castShadow=true;headG.add(hairTop);
-  const lockG=new THREE.CapsuleGeometry(.07*s,.2*s,4,8);
-  const lkL=new THREE.Mesh(lockG,hairM);lkL.position.set(-.43*s,-.1*s,.08*s);lkL.rotation.z=.12;headG.add(lkL);
-  const lkR=new THREE.Mesh(lockG,hairM);lkR.position.set(.43*s,-.1*s,.08*s);lkR.rotation.z=-.12;headG.add(lkR);
-  // antena lucu (tetap, jadi jepit rambut AI 🤖)
-  const ant=new THREE.Mesh(new THREE.CylinderGeometry(.02*s,.02*s,.3*s,8),M.black);
-  ant.position.set(.12*s,.6*s,-.05*s);headG.add(ant);
-  const antTip=new THREE.Mesh(new THREE.SphereGeometry(.06*s,10,8),
-    new THREE.MeshStandardMaterial({color:colorHex,emissive:colorHex,emissiveIntensity:.7}));
-  antTip.position.set(.12*s,.76*s,-.05*s);headG.add(antTip);refs.antTip=antTip;
-  // lengan (pivot di bahu)
   function arm(side){
     const pivot=new THREE.Group();pivot.position.set(side*.36*s,.82*s,0);g.add(pivot);
     const a=new THREE.Mesh(new THREE.CapsuleGeometry(.09*s,.3*s,4,10),cm);
@@ -818,20 +782,55 @@ function makeChibi(colorHex,isManager=false){
     return pivot;
   }
   refs.armL=arm(-1);refs.armR=arm(1);
-  // kaki mungil
   const legG=new THREE.CapsuleGeometry(.1*s,.18*s,4,8);
   const lL=new THREE.Mesh(legG,M.black);lL.position.set(-.15*s,.14*s,0);g.add(lL);
   const lR=new THREE.Mesh(legG,M.black);lR.position.set(.15*s,.14*s,0);g.add(lR);
-  // Zzz (tidur)
+}
+
+function makeChibi(colorHex){
+  const g=new THREE.Group();
+  const refs={};
+  const cm=new THREE.MeshStandardMaterial({color:colorHex,roughness:.55});
+  const s=1;
+  chibiBody(g,refs,cm,s,false);
+  const headG=new THREE.Group();headG.position.y=1.32*s;g.add(headG);refs.head=headG;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.44*s,24,20),M.skin);
+  head.castShadow=true;headG.add(head);
+  const eyeG=new THREE.SphereGeometry(.07*s,12,10);
+  const eL=new THREE.Mesh(eyeG,M.black);eL.position.set(-.16*s,.06*s,.38*s);headG.add(eL);
+  const eR=new THREE.Mesh(eyeG,M.black);eR.position.set(.16*s,.06*s,.38*s);headG.add(eR);
+  const blG=new THREE.SphereGeometry(.055*s,10,8);
+  const bL=new THREE.Mesh(blG,M.pink);bL.position.set(-.28*s,-.08*s,.33*s);bL.scale.z=.4;headG.add(bL);
+  const bR=new THREE.Mesh(blG,M.pink);bR.position.set(.28*s,-.08*s,.33*s);bR.scale.z=.4;headG.add(bR);
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.09*s,.022*s,8,14,Math.PI),M.black);
+  mouth.position.set(0,-.14*s,.4*s);mouth.rotation.x=Math.PI;headG.add(mouth);refs.mouth=mouth;
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(.02*s,.02*s,.3*s,8),M.black);
+  ant.position.y=.52*s;headG.add(ant);
+  const antTip=new THREE.Mesh(new THREE.SphereGeometry(.06*s,10,8),
+    new THREE.MeshStandardMaterial({color:colorHex,emissive:colorHex,emissiveIntensity:.7}));
+  antTip.position.y=.68*s;headG.add(antTip);refs.antTip=antTip;
   refs.zzz=[];
   for(let i=0;i<3;i++){
     const z=symbolSprite('Z','#90e0ef',.5);z.visible=false;z.position.set(.6,2.1+i*.35,.2);
     z.userData.phase=i*.7;g.add(z);refs.zzz.push(z);
   }
-  // "?" (error)
   const q=symbolSprite('?','#ff5964',.8);q.visible=false;q.position.set(0,2.5,0);g.add(q);refs.q=q;
-  // "!" kerja
   const exc=symbolSprite('!','#52b788',.55);exc.visible=false;exc.position.set(-.75,2.2,0);g.add(exc);refs.exc=exc;
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  return {group:g,refs,s};
+}
+
+// ===== MASKOT BERWAJAH ASLI (Remi & Mochi) =====
+function makeMascot(colorHex,faceTex,s,withTie){
+  const g=new THREE.Group();
+  const refs={};
+  const cm=new THREE.MeshStandardMaterial({color:colorHex,roughness:.55});
+  chibiBody(g,refs,cm,s,withTie);
+  const headG=new THREE.Group();headG.position.y=1.42*s;g.add(headG);refs.head=headG;
+  const faceMat=new THREE.SpriteMaterial({map:faceTex,transparent:true,depthWrite:false});
+  const face=new THREE.Sprite(faceMat);
+  face.scale.set(1.7*s,1.7*s,1);headG.add(face);
+  refs.faceMat=faceMat;
   g.traverse(o=>{if(o.isMesh)o.castShadow=true});
   return {group:g,refs,s};
 }
@@ -876,14 +875,20 @@ EMPLOYEES.forEach((emp,i)=>{
   last.scale.set(1.9,.6,1);last.position.set(x,2.28,z-1.15);scene.add(last);
   actors.push({...c,scrMat:d.screenMat,status:st.status,baseY:0,seed:Math.random()*10});
 });
-// meja manager Remi (lebih besar, di depan)
+// meja manager Remi (wajah asli!) + Mochi si asisten maskot
 {
   const d=makeDesk(3);d.group.position.set(0,0,6.2);d.group.rotation.y=Math.PI;scene.add(d.group);
-  const remi=makeChibi(0x9b5de5,true);
+  const remi=makeMascot(0x9b5de5,REMI_TEX,1.25,true);
   remi.group.position.set(0,0,7.35);remi.group.rotation.y=Math.PI;scene.add(remi.group);
   const plate=textSprite(['REMI — MANAGER','☕ MENGAWASI'],{border:'#f15bb5',fg2:'#f15bb5'});
-  plate.position.set(0,3.4,7.35);scene.add(plate);
-  actors.push({...remi,scrMat:d.screenMat,status:'kerja',baseY:0,seed:3.3,manager:true});
+  plate.position.set(0,3.7,7.35);scene.add(plate);
+  actors.push({...remi,scrMat:d.screenMat,status:'kerja',baseY:0,seed:3.3});
+  // Mochi 🌸
+  const mochi=makeMascot(0xb8a9e0,MOCHI_TEX,1.0,false);
+  mochi.group.position.set(3.2,0,6.7);scene.add(mochi.group);
+  const mplate=textSprite(['MOCHI','🌸 ASISTEN'],{border:'#ff8fc7',fg2:'#ff8fc7'});
+  mplate.position.set(3.2,2.9,6.7);scene.add(mplate);
+  actors.push({...mochi,scrMat:null,status:'mochi',baseY:0,seed:7.7});
 }
 
 // ===== ANIMASI =====
@@ -894,8 +899,27 @@ function animate(){
   actors.forEach(a=>{
     const {refs,s}=a,grp=a.group;
     // reset umum
-    refs.q.visible=false;refs.exc.visible=false;refs.zzz.forEach(z=>z.visible=false);
-    if(a.status==='kerja'){
+    if(refs.q)refs.q.visible=false;
+    if(refs.exc)refs.exc.visible=false;
+    if(refs.zzz)refs.zzz.forEach(z=>z.visible=false);
+    if(refs.faceMat){
+      // maskot berwajah asli: tilt via material.rotation (sprite selalu menghadap kamera)
+      const fm=refs.faceMat;
+      if(a.status==='mochi'){
+        grp.position.y=a.baseY+Math.abs(Math.sin(t*2.5+a.seed))*.08;
+        fm.rotation=Math.sin(t*2.5+a.seed)*.12;
+        refs.armR.rotation.z=-2.3+Math.sin(t*7)*.4; // dadah-dadah 👋
+        refs.armR.rotation.x=0;
+        refs.armL.rotation.x=.15;refs.armL.rotation.z=.15;
+      }else{
+        grp.position.y=a.baseY+Math.abs(Math.sin(t*4+a.seed))*.06;
+        fm.rotation=Math.sin(t*4+a.seed)*.06;
+        refs.armL.rotation.x=-.85+Math.sin(t*11+a.seed)*.3;
+        refs.armR.rotation.x=-.85+Math.sin(t*11+a.seed+Math.PI)*.3;
+        refs.armL.rotation.z=.25;refs.armR.rotation.z=-.25;
+        if(a.scrMat){a.scrMat.emissive.setHex(0x00b4d8);a.scrMat.emissiveIntensity=1.4;}
+      }
+    }else if(a.status==='kerja'){
       // ngetik semangat di depan meja
       grp.position.y=a.baseY+Math.abs(Math.sin(t*4+a.seed))*.06;
       refs.head.rotation.x=Math.sin(t*4+a.seed)*.06;
