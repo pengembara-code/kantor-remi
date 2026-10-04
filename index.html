@@ -777,11 +777,12 @@ function makeChibi(colorHex,isManager=false){
   const headG=new THREE.Group();headG.position.y=1.32*s;g.add(headG);refs.head=headG;
   const head=new THREE.Mesh(new THREE.SphereGeometry(.44*s,24,20),M.skin);
   head.castShadow=true;headG.add(head);
-  // mata
+  // mata: kiri bulat, kanan kedip — ciri khas Remi 😉
   const eyeG=new THREE.SphereGeometry(.07*s,12,10);
   const eL=new THREE.Mesh(eyeG,M.black);eL.position.set(-.16*s,.06*s,.38*s);headG.add(eL);
-  const eR=new THREE.Mesh(eyeG,M.black);eR.position.set(.16*s,.06*s,.38*s);headG.add(eR);
-  refs.eyeL=eL;refs.eyeR=eR;
+  const wink=new THREE.Mesh(new THREE.TorusGeometry(.06*s,.018*s,8,12,Math.PI),M.black);
+  wink.position.set(.17*s,.06*s,.385*s);wink.rotation.z=-Math.PI/2;headG.add(wink);
+  refs.eyeL=eL;refs.eyeR=wink;
   // blush
   const blG=new THREE.SphereGeometry(.055*s,10,8);
   const bL=new THREE.Mesh(blG,M.pink);bL.position.set(-.28*s,-.08*s,.33*s);bL.scale.z=.4;headG.add(bL);
@@ -790,12 +791,23 @@ function makeChibi(colorHex,isManager=false){
   const mouth=new THREE.Mesh(new THREE.TorusGeometry(.09*s,.022*s,8,14,Math.PI),
     M.black);
   mouth.position.set(0,-.14*s,.4*s);mouth.rotation.x=Math.PI;headG.add(mouth);refs.mouth=mouth;
-  // topi/asesoris: antena lucu
+  // rambut pink khas Remi 💗
+  const hairM=new THREE.MeshStandardMaterial({color:0xff8fc7,roughness:.55});
+  const hairBack=new THREE.Mesh(new THREE.SphereGeometry(.46*s,20,16),hairM);
+  hairBack.position.set(0,.04*s,-.18*s);hairBack.scale.set(1,1.08,.8);
+  hairBack.castShadow=true;headG.add(hairBack);
+  const hairTop=new THREE.Mesh(
+    new THREE.SphereGeometry(.47*s,24,14,0,Math.PI*2,0,Math.PI*.5),hairM);
+  hairTop.position.set(0,.09*s,-.02*s);hairTop.castShadow=true;headG.add(hairTop);
+  const lockG=new THREE.CapsuleGeometry(.07*s,.2*s,4,8);
+  const lkL=new THREE.Mesh(lockG,hairM);lkL.position.set(-.43*s,-.1*s,.08*s);lkL.rotation.z=.12;headG.add(lkL);
+  const lkR=new THREE.Mesh(lockG,hairM);lkR.position.set(.43*s,-.1*s,.08*s);lkR.rotation.z=-.12;headG.add(lkR);
+  // antena lucu (tetap, jadi jepit rambut AI 🤖)
   const ant=new THREE.Mesh(new THREE.CylinderGeometry(.02*s,.02*s,.3*s,8),M.black);
-  ant.position.y=.52*s;headG.add(ant);
+  ant.position.set(.12*s,.6*s,-.05*s);headG.add(ant);
   const antTip=new THREE.Mesh(new THREE.SphereGeometry(.06*s,10,8),
     new THREE.MeshStandardMaterial({color:colorHex,emissive:colorHex,emissiveIntensity:.7}));
-  antTip.position.y=.68*s;headG.add(antTip);refs.antTip=antTip;
+  antTip.position.set(.12*s,.76*s,-.05*s);headG.add(antTip);refs.antTip=antTip;
   // lengan (pivot di bahu)
   function arm(side){
     const pivot=new THREE.Group();pivot.position.set(side*.36*s,.82*s,0);g.add(pivot);
