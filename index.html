@@ -1,392 +1,52 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kantor AI - Coziness & Productivity</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #2c221e;
-            color: #f4eee2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            color: #ffb703;
-            text-shadow: 2px 2px 0px #000;
-            margin-bottom: 5px;
-        }
-
-        p.subtitle {
-            font-size: 1rem;
-            color: #d3c5b4;
-            font-style: italic;
-        }
-
-        /* Ruangan Kantor */
-        .office-room {
-            position: relative;
-            width: 100%;
-            max-width: 1100px;
-            background: #4a3832;
-            border: 8px solid #241b17;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 50px rgba(0,0,0,0.4);
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            background-image: 
-                linear-gradient(90deg, rgba(0,0,0,0.05) 50%, transparent 50%),
-                linear-gradient(0deg, rgba(0,0,0,0.05) 50%, transparent 50%);
-            background-size: 40px 40px;
-        }
-
-        /* Jendela & Lampu Hias */
-        .window {
-            position: absolute;
-            top: 15px;
-            left: 30px;
-            width: 120px;
-            height: 90px;
-            background: linear-gradient(to bottom, #8ecae6, #219ebc);
-            border: 6px solid #241b17;
-            border-radius: 8px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .window::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: #241b17;
-            top: 50%;
-        }
-        .window::after {
-            content: '';
-            position: absolute;
-            width: 4px;
-            height: 100%;
-            background: #241b17;
-            left: 50%;
-        }
-
-        .plant {
-            position: absolute;
-            top: 25px;
-            right: 30px;
-            font-size: 2rem;
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
-        }
-
-        /* Meja Manager */
-        .manager-desk-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 2px dashed rgba(255,255,255,0.1);
-            padding-bottom: 20px;
-        }
-
-        .nameplate {
-            background: #e9d8a6;
-            color: #333;
-            padding: 3px 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            border-radius: 4px;
-            border: 2px solid #ae2012;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        /* Grid Karyawan */
-        .employee-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            width: 100%;
-        }
-
-        /* Kartu Meja Karyawan */
-        .desk-card {
-            background: #3b2b25;
-            border: 4px solid #1e1512;
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            position: relative;
-            transition: transform 0.2s;
-        }
-        .desk-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .model-name {
-            font-weight: bold;
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-            color: #ffecd1;
-            text-align: center;
-        }
-
-        /* Karakter Blob & Meja */
-        .character-container {
-            position: relative;
-            height: 100px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            margin-bottom: 10px;
-        }
-
-        .blob {
-            width: 65px;
-            height: 60px;
-            border-radius: 50% 50% 40% 40%;
-            position: absolute;
-            bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.4);
-            transition: all 0.3s ease;
-        }
-
-        .blob-face {
-            position: relative;
-            width: 35px;
-            height: 20px;
-        }
-
-        /* Ekspresi Wajah */
-        .eye {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #111;
-            border-radius: 50%;
-            top: 2px;
-        }
-        .eye.left { left: 4px; }
-        .eye.right { right: 4px; }
-
-        .mouth {
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 10px;
-            height: 5px;
-            border-bottom: 3px solid #111;
-            border-radius: 0 0 10px 10px;
-        }
-
-        /* Status: Tidur (Istirahat) */
-        .status-istirahat .eye {
-            height: 2px;
-            border-radius: 1px;
-            top: 5px;
-        }
-        .status-istirahat .mouth {
-            width: 6px;
-            height: 3px;
-            border: 2px solid #111;
-            border-top: none;
-            border-radius: 0 0 6px 6px;
-        }
-        .zzz {
-            position: absolute;
-            top: -15px;
-            right: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #90e0ef;
-            animation: floatZ 2s infinite ease-in-out;
-        }
-        @keyframes floatZ {
-            0% { transform: translateY(0) scale(0.8); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
-        }
-
-        /* Status: Kena Limit (Pusing) */
-        .status-limit .eye {
-            background: transparent;
-            border-top: 2px solid #111;
-            width: 8px;
-            height: 4px;
-            border-radius: 0;
-        }
-        .status-limit .mouth {
-            width: 8px;
-            height: 8px;
-            border: none;
-            background: #111;
-            border-radius: 50%;
-            bottom: 0px;
-        }
-
-        /* Status: Kerja (Semangat) */
-        .status-kerja .blob {
-            animation: bounce 1.5s infinite alternate;
-        }
-        @keyframes bounce {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-4px); }
-        }
-
-        /* Meja Mini & Laptop */
-        .desk-furniture {
-            position: absolute;
-            bottom: 0;
-            width: 90px;
-            height: 18px;
-            background: #241b17;
-            border-radius: 4px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .laptop {
-            width: 30px;
-            height: 16px;
-            background: #d3d3d3;
-            border-radius: 2px 2px 0 0;
-            position: relative;
-            top: -16px;
-            border: 1px solid #777;
-        }
-        .laptop-screen {
-            width: 26px;
-            height: 12px;
-            background: #000;
-            margin: 1px auto 0 auto;
-            border-radius: 1px;
-        }
-        .status-kerja .laptop-screen {
-            background: #90e0ef;
-            box-shadow: 0 0 6px #00b4d8;
-        }
-
-        /* Badge Status */
-        .badge-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            width: 100%;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .badge-kerja { background: #52b788; color: #fff; }
-        .badge-limit { background: #e63946; color: #fff; }
-        .badge-istirahat { background: #6c757d; color: #fff; }
-
-        .last-active {
-            font-size: 0.65rem;
-            color: #b0a494;
-        }
-
-        /* Responsif HP */
-        @media (max-width: 600px) {
-            .office-room {
-                padding: 15px 10px;
-                gap: 20px;
-            }
-            .window {
-                width: 80px;
-                height: 60px;
-                top: 10px;
-                left: 15px;
-            }
-            .plant {
-                top: 15px;
-                right: 15px;
-                font-size: 1.5rem;
-            }
-            h1 {
-                font-size: 1.8rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kantor AI 3D 🏢</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#1a1210;color:#f4eee2;overflow:hidden}
+#app{position:fixed;inset:0}
+header{position:fixed;top:0;left:0;right:0;z-index:10;text-align:center;padding:12px 10px;
+background:linear-gradient(180deg,rgba(20,12,10,.85),transparent);pointer-events:none}
+h1{font-size:1.5rem;color:#ffb703;text-shadow:2px 2px 0 #000}
+.sub{font-size:.8rem;color:#d3c5b4;font-style:italic}
+#legend{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pill{font-size:.68rem;font-weight:bold;padding:5px 12px;border-radius:14px;border:2px solid #000;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.p-kerja{background:#52b788}.p-limit{background:#e63946}.p-istirahat{background:#6c757d}
+#hint{position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:10;font-size:.68rem;color:#b0a494;
+background:rgba(0,0,0,.45);padding:4px 12px;border-radius:10px;white-space:nowrap}
+#loading{position:fixed;inset:0;z-index:20;background:#1a1210;display:flex;flex-direction:column;gap:14px;
+align-items:center;justify-content:center;font-size:1rem;color:#ffb703}
+.spin{font-size:2.4rem;animation:sp 1.2s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#datainfo{position:fixed;top:12px;right:12px;z-index:10;font-size:.65rem;color:#b0a494;background:rgba(0,0,0,.45);
+padding:5px 10px;border-radius:8px}
+</style>
+<script type="importmap">
+{"imports":{
+"three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+"three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
 </head>
 <body>
+<div id="app"></div>
+<div id="loading"><div class="spin">🏗️</div><div>Membangun kantor 3D...</div></div>
+<header><h1>🏢 Kantor AI 3D</h1><p class="sub">Ruang kerja maya para model AI — sekarang dalam 3D!</p></header>
+<div id="datainfo"></div>
+<div id="hint">👆 geser untuk memutar &nbsp;•&nbsp; 🤏 cubit untuk zoom</div>
+<div id="legend">
+<span class="pill p-kerja">🟢 KERJA</span>
+<span class="pill p-limit">🔴 KENA LIMIT</span>
+<span class="pill p-istirahat">⚪ ISTIRAHAT</span>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 
-    <header>
-        <h1>Kantor AI</h1>
-        <p class="subtitle">Ruang kerja maya para model AI yang super sibuk & cozy</p>
-    </header>
-
-    <div class="office-room">
-        <!-- Dekorasi Ruangan -->
-        <div class="window"></div>
-        <div class="plant">🪴</div>
-
-        <!-- Meja Manager (Remi) -->
-        <div class="manager-desk-area">
-            <div class="nameplate">MANAGER : REMI</div>
-            <div class="character-container" style="height: 80px;">
-                <div class="blob" style="background: #9b5de5; width: 55px; height: 50px;">
-                    <div class="blob-face">
-                        <div class="eye left" style="background:#00f5d4;"></div>
-                        <div class="eye right" style="background:#00f5d4;"></div>
-                        <div class="mouth" style="width: 12px;"></div>
-                    </div>
-                    <!-- Dasi kecil -->
-                    <div style="position: absolute; bottom: 8px; width: 4px; height: 10px; background: #fee440; border-radius: 1px;"></div>
-                </div>
-            </div>
-            <div style="font-size: 0.75rem; color: #f15bb5; font-weight: bold; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px;">
-                ☕ Mengawasi Kinerja Tim
-            </div>
-        </div>
-
-        <!-- Grid Meja Karyawan (Model AI) -->
-        <div class="employee-grid" id="employeeGrid">
-            <!-- JavaScript akan merender kartu karyawan di sini -->
-        </div>
-    </div>
-
-    <script>
-        // Data Dummy / Asli dari Pengguna
-        const USAGE_DATA = [
+// ===== DATA (disuntik refresh-dashboard.py dari usage.jsonl) =====
+const USAGE_DATA = [
             {
                         "ts": "2026-09-29T04:07:04",
                         "provider": "openrouter",
@@ -626,107 +286,654 @@
                         "prompt_chars": 10,
                         "reply_chars": 0,
                         "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T22:03:43",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 6.0,
+                        "prompt_chars": 24,
+                        "reply_chars": 368,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:08:17",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 14.9,
+                        "prompt_chars": 701,
+                        "reply_chars": 318,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:10:35",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 2.7,
+                        "prompt_chars": 671,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T22:10:36",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": true,
+                        "latency_s": 1.6,
+                        "prompt_chars": 671,
+                        "reply_chars": 75,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:11:26",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 0.5,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T15:11:26",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": false,
+                        "latency_s": 0.5,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T15:11:27",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 0.4,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T15:11:27",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-31b-it:free",
+                        "ok": false,
+                        "latency_s": 0.3,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T15:11:39",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3.5-lightning:free",
+                        "ok": false,
+                        "latency_s": 12.0,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T15:11:39",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-26b-a4b-it:free",
+                        "ok": false,
+                        "latency_s": 0.3,
+                        "prompt_chars": 659,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T15:11:41",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.7,
+                        "prompt_chars": 6,
+                        "reply_chars": 422,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:12:17",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 12.8,
+                        "prompt_chars": 1127,
+                        "reply_chars": 280,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:13:16",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 20.3,
+                        "prompt_chars": 1455,
+                        "reply_chars": 792,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:18:41",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 27.7,
+                        "prompt_chars": 2371,
+                        "reply_chars": 514,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:19:28",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.5,
+                        "prompt_chars": 19,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:19:29",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 0.4,
+                        "prompt_chars": 25,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T22:19:30",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 1.0,
+                        "prompt_chars": 25,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:19:32",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 2.3,
+                        "prompt_chars": 25,
+                        "reply_chars": 2,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:19:44",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 11.6,
+                        "prompt_chars": 2946,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T15:20:04",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": true,
+                        "latency_s": 19.2,
+                        "prompt_chars": 2946,
+                        "reply_chars": 366,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:23:19",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.5,
+                        "prompt_chars": 5,
+                        "reply_chars": 346,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:24:01",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": true,
+                        "latency_s": 17.0,
+                        "prompt_chars": 912,
+                        "reply_chars": 780,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:24:21",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.3,
+                        "prompt_chars": 4,
+                        "reply_chars": 280,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:24:55",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.9,
+                        "prompt_chars": 44,
+                        "reply_chars": 677,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T22:26:35",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+                        "ok": false,
+                        "latency_s": 30.9,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T22:26:49",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                        "ok": false,
+                        "latency_s": 13.3,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T22:26:49",
+                        "provider": "openrouter",
+                        "model": "qwen/qwen3.8-27b:free",
+                        "ok": false,
+                        "latency_s": 0.4,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T22:26:49",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-31b-it:free",
+                        "ok": false,
+                        "latency_s": 0.3,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "HTTP 429"
+            },
+            {
+                        "ts": "2026-09-29T22:27:09",
+                        "provider": "openrouter",
+                        "model": "nvidia/nemotron-3.5-lightning:free",
+                        "ok": false,
+                        "latency_s": 19.6,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "IncompleteRead"
+            },
+            {
+                        "ts": "2026-09-29T22:27:09",
+                        "provider": "openrouter",
+                        "model": "google/gemma-4-26b-a4b-it:free",
+                        "ok": false,
+                        "latency_s": 0.4,
+                        "prompt_chars": 998,
+                        "reply_chars": 0,
+                        "error": "RemoteDisconnected"
+            },
+            {
+                        "ts": "2026-09-29T22:27:11",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 2.1,
+                        "prompt_chars": 70,
+                        "reply_chars": 896,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:28:34",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.6,
+                        "prompt_chars": 21,
+                        "reply_chars": 713,
+                        "error": ""
+            },
+            {
+                        "ts": "2026-09-29T15:28:36",
+                        "provider": "google-ai-studio",
+                        "model": "gemini-3.5-flash-lite",
+                        "ok": true,
+                        "latency_s": 1.6,
+                        "prompt_chars": 21,
+                        "reply_chars": 766,
+                        "error": ""
             }
 ];;
 
-        // Daftar Karyawan sesuai spesifikasi
-        const EMPLOYEES = [
-            { id: "nvidia/nemotron-3-ultra-550b-a55b:free", name: "Nemotron Ultra", color: "#0077b6" },
-            { id: "nvidia/nemotron-3-super-120b-a12b:free", name: "Nemotron Super", color: "#00b4d8" },
-            { id: "qwen/qwen3.8-27b:free", name: "Qwen 3.8", color: "#f77f00" },
-            { id: "google/gemma-4-31b-it:free", name: "Gemma 31B", color: "#38b000" },
-            { id: "nvidia/nemotron-3.5-lightning:free", name: "Nemotron Lightning", color: "#ffb703" },
-            { id: "google/gemma-4-26b-a4b-it:free", name: "Gemma 26B", color: "#ff70a6" },
-            { id: "gemini-3.5-flash-lite", name: "Gemini Flash", color: "#7209b7" }
-        ];
+const EMPLOYEES=[
+{id:"nvidia/nemotron-3-ultra-550b-a55b:free",name:"Nemotron Ultra",color:0x0077b6},
+{id:"nvidia/nemotron-3-super-120b-a12b:free",name:"Nemotron Super",color:0x00b4d8},
+{id:"qwen/qwen3.8-27b:free",name:"Qwen 3.8",color:0xf77f00},
+{id:"google/gemma-4-31b-it:free",name:"Gemma 31B",color:0x38b000},
+{id:"nvidia/nemotron-3.5-lightning:free",name:"Nemotron Lightning",color:0xffb703},
+{id:"google/gemma-4-26b-a4b-it:free",name:"Gemma 26B",color:0xff70a6},
+{id:"gemini-3.5-flash-lite",name:"Gemini Flash",color:0x7209b7}];
 
-        function formatJamIndo(isoString) {
-            if (!isoString) return "-";
-            const date = new Date(isoString);
-            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        }
+const STATUS_STYLE={kerja:{label:'KERJA',badge:'#52b788'},limit:{label:'KENA LIMIT',badge:'#e63946'},istirahat:{label:'ISTIRAHAT',badge:'#6c757d'}};
 
-        function renderOffice() {
-            const grid = document.getElementById('employeeGrid');
-            grid.innerHTML = '';
+function computeStatus(){
+  const now=new Date(),out={};
+  EMPLOYEES.forEach(emp=>{
+    const entries=USAGE_DATA.filter(e=>e.model===emp.id).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    let st='istirahat',last='Belum ada aktivitas';
+    if(entries.length){
+      const e=entries[0],d=new Date(e.ts);
+      last='aktif '+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      const mins=(now-d)/60000;
+      if(e.ok===false)st='limit';
+      else if(mins<=10)st='kerja';
+    }
+    out[emp.id]={status:st,last};
+  });
+  return out;
+}
+const STATUS=computeStatus();
+let latestTs='-';
+USAGE_DATA.forEach(e=>{if(!latestTs||e.ts>latestTs)latestTs=e.ts});
+document.getElementById('datainfo').textContent='📊 data: '+latestTs.slice(0,16).replace('T',' ');
 
-            // Waktu "sekarang" simulasi (menggunakan waktu lokal saat script berjalan)
-            const now = new Date();
+// ===== SCENE =====
+const app=document.getElementById('app');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
 
-            EMPLOYEES.forEach(emp => {
-                // Cari entri TERAKHIR berdasarkan ts untuk model ini
-                const modelEntries = USAGE_DATA.filter(item => item.model === emp.id);
-                let latestEntry = null;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x241a18);
+scene.fog=new THREE.Fog(0x241a18,25,55);
 
-                if (modelEntries.length > 0) {
-                    modelEntries.sort((a, b) => new Date(b.ts) - new Date(a.ts));
-                    latestEntry = modelEntries[0];
-                }
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,200);
+camera.position.set(0,8.5,14);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,1,0);
+controls.enableDamping=true;controls.dampingFactor=.06;
+controls.maxPolarAngle=Math.PI/2.15;controls.minDistance=5;controls.maxDistance=30;
 
-                let statusType = 'istirahat'; // default
-                let statusText = 'ISTIRAHAT';
-                let badgeClass = 'badge-istirahat';
-                let lastActiveStr = 'Belum ada aktivitas';
+scene.add(new THREE.HemisphereLight(0xfff2df,0x3a2a24,.85));
+const sun=new THREE.DirectionalLight(0xffe9c4,1.6);
+sun.position.set(8,14,8);sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-14;sun.shadow.camera.right=14;sun.shadow.camera.top=14;sun.shadow.camera.bottom=-14;
+scene.add(sun);
+const warm=new THREE.PointLight(0xffb703,.7,25);warm.position.set(0,6,2);scene.add(warm);
 
-                if (latestEntry) {
-                    lastActiveStr = `terakhir aktif ${formatJamIndo(latestEntry.ts)}`;
-                    const entryTime = new Date(latestEntry.ts);
-                    const diffMinutes = (now - entryTime) / (1000 * 60);
+// ===== RUANGAN =====
+const M={
+  floor:new THREE.MeshStandardMaterial({color:0x8b5e3c,roughness:.9}),
+  wall:new THREE.MeshStandardMaterial({color:0x5a4238,roughness:.95}),
+  wood:new THREE.MeshStandardMaterial({color:0x6b4423,roughness:.8}),
+  woodDark:new THREE.MeshStandardMaterial({color:0x4a2f18,roughness:.85}),
+  skin:new THREE.MeshStandardMaterial({color:0xffd9b3,roughness:.6}),
+  black:new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.4}),
+  white:new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5}),
+  pink:new THREE.MeshStandardMaterial({color:0xff9db0,roughness:.6}),
+};
+function box(w,h,d,mat,x,y,z,shadow=true){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(x,y,z);m.castShadow=shadow;m.receiveShadow=true;scene.add(m);return m;
+}
+{
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,24),M.floor);
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+  const rug=new THREE.Mesh(new THREE.CircleGeometry(5.5,40),
+    new THREE.MeshStandardMaterial({color:0x9b5de5,roughness:1}));
+  rug.rotation.x=-Math.PI/2;rug.position.set(0,.01,1);rug.receiveShadow=true;scene.add(rug);
+  const back=new THREE.Mesh(new THREE.PlaneGeometry(30,10),M.wall);
+  back.position.set(0,5,-9);back.receiveShadow=true;scene.add(back);
+  const left=new THREE.Mesh(new THREE.PlaneGeometry(24,10),M.wall);
+  left.rotation.y=Math.PI/2;left.position.set(-13,5,0);left.receiveShadow=true;scene.add(left);
+  // jendela
+  const winGlow=new THREE.Mesh(new THREE.PlaneGeometry(5,3.4),
+    new THREE.MeshStandardMaterial({color:0xbfe9ff,emissive:0x8ecae6,emissiveIntensity:.9}));
+  winGlow.position.set(-6,5.6,-8.9);scene.add(winGlow);
+  box(5.5,.25,.25,M.woodDark,-6,7.4,-8.85);box(5.5,.25,.25,M.woodDark,-6,3.8,-8.85);
+  box(.25,3.8,.25,M.woodDark,-8.6,5.6,-8.85);box(.25,3.8,.25,M.woodDark,-3.4,5.6,-8.85);
+  box(.18,3.4,.18,M.woodDark,-6,5.6,-8.85);box(5,.18,.18,M.woodDark,-6,5.6,-8.85);
+  // tanaman
+  const pot=new THREE.Mesh(new THREE.CylinderGeometry(.45,.35,.7,16),
+    new THREE.MeshStandardMaterial({color:0xb5651d,roughness:.8}));
+  pot.position.set(11,.35,-7);pot.castShadow=true;scene.add(pot);
+  const leafM=new THREE.MeshStandardMaterial({color:0x38b000,roughness:.7});
+  for(let i=0;i<5;i++){
+    const leaf=new THREE.Mesh(new THREE.ConeGeometry(.35,1.6,8),leafM);
+    const a=i/5*Math.PI*2;
+    leaf.position.set(11+Math.cos(a)*.3,1.5,-7+Math.sin(a)*.3);
+    leaf.rotation.set(Math.sin(a)*.35,0,Math.cos(a)*.35);leaf.castShadow=true;scene.add(leaf);
+  }
+  // papan tulis "KANTOR AI"
+  const c=document.createElement('canvas');c.width=512;c.height=160;
+  const g=c.getContext('2d');g.fillStyle='#2b2b3a';g.fillRect(0,0,512,160);
+  g.strokeStyle='#ffb703';g.lineWidth=10;g.strokeRect(8,8,496,144);
+  g.fillStyle='#ffb703';g.font='bold 64px sans-serif';g.textAlign='center';
+  g.fillText('KANTOR AI',256,105);
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(6,1.9),
+    new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(c)}));
+  sign.position.set(4,6.4,-8.9);scene.add(sign);
+}
 
-                    if (latestEntry.ok === false) {
-                        statusType = 'limit';
-                        statusText = 'KENA LIMIT';
-                        badgeClass = 'badge-limit';
-                    } else if (latestEntry.ok === true && diffMinutes <= 10) {
-                        statusType = 'kerja';
-                        statusText = 'KERJA';
-                        badgeClass = 'badge-kerja';
-                    } else {
-                        // ok: true tapi sudah lewat 10 menit
-                        statusType = 'istirahat';
-                        statusText = 'ISTIRAHAT';
-                        badgeClass = 'badge-istirahat';
-                    }
-                }
+// ===== SPRITE TEKS (nameplate & simbol) =====
+function textSprite(lines,opts={}){
+  const c=document.createElement('canvas');c.width=512;c.height=160;
+  const g=c.getContext('2d');
+  g.fillStyle=opts.bg||'rgba(20,14,12,.82)';
+  g.beginPath();g.roundRect(6,6,500,148,26);g.fill();
+  g.strokeStyle=opts.border||'#ffb703';g.lineWidth=6;
+  g.beginPath();g.roundRect(6,6,500,148,26);g.stroke();
+  g.textAlign='center';g.fillStyle=opts.fg||'#fff';
+  g.font='bold 52px sans-serif';
+  g.fillText(lines[0],256,lines[1]?72:100);
+  if(lines[1]){g.font='bold 40px sans-serif';g.fillStyle=opts.fg2||'#ffd23f';g.fillText(lines[1],256,128)}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false}));
+  s.scale.set(2.6,.82,1);return s;
+}
+function symbolSprite(txt,color,size=1){
+  const c=document.createElement('canvas');c.width=128;c.height=128;
+  const g=c.getContext('2d');g.font='bold 92px sans-serif';g.textAlign='center';
+  g.shadowColor=color;g.shadowBlur=18;g.fillStyle=color;g.fillText(txt,64,96);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false}));
+  s.scale.set(size,size,1);return s;
+}
 
-                // Render HTML Kartu
-                const card = document.createElement('div');
-                card.className = `desk-card status-${statusType}`;
+// ===== KARAKTER CHIBI IMUT =====
+function makeChibi(colorHex,isManager=false){
+  const g=new THREE.Group();
+  const refs={};
+  const cm=new THREE.MeshStandardMaterial({color:colorHex,roughness:.55});
+  const s=isManager?1.25:1;
+  // badan
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(.34*s,.42*s,6,14),cm);
+  body.position.y=.62*s;body.castShadow=true;g.add(body);refs.body=body;
+  // dasi manager
+  if(isManager){
+    const tie=new THREE.Mesh(new THREE.BoxGeometry(.12,.3,.06),
+      new THREE.MeshStandardMaterial({color:0xfee440,roughness:.5}));
+    tie.position.set(0,.72*s,.36*s);g.add(tie);
+  }
+  // kepala
+  const headG=new THREE.Group();headG.position.y=1.32*s;g.add(headG);refs.head=headG;
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.44*s,24,20),M.skin);
+  head.castShadow=true;headG.add(head);
+  // mata
+  const eyeG=new THREE.SphereGeometry(.07*s,12,10);
+  const eL=new THREE.Mesh(eyeG,M.black);eL.position.set(-.16*s,.06*s,.38*s);headG.add(eL);
+  const eR=new THREE.Mesh(eyeG,M.black);eR.position.set(.16*s,.06*s,.38*s);headG.add(eR);
+  refs.eyeL=eL;refs.eyeR=eR;
+  // blush
+  const blG=new THREE.SphereGeometry(.055*s,10,8);
+  const bL=new THREE.Mesh(blG,M.pink);bL.position.set(-.28*s,-.08*s,.33*s);bL.scale.z=.4;headG.add(bL);
+  const bR=new THREE.Mesh(blG,M.pink);bR.position.set(.28*s,-.08*s,.33*s);bR.scale.z=.4;headG.add(bR);
+  // mulut (senyum)
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.09*s,.022*s,8,14,Math.PI),
+    M.black);
+  mouth.position.set(0,-.14*s,.4*s);mouth.rotation.x=Math.PI;headG.add(mouth);refs.mouth=mouth;
+  // topi/asesoris: antena lucu
+  const ant=new THREE.Mesh(new THREE.CylinderGeometry(.02*s,.02*s,.3*s,8),M.black);
+  ant.position.y=.52*s;headG.add(ant);
+  const antTip=new THREE.Mesh(new THREE.SphereGeometry(.06*s,10,8),
+    new THREE.MeshStandardMaterial({color:colorHex,emissive:colorHex,emissiveIntensity:.7}));
+  antTip.position.y=.68*s;headG.add(antTip);refs.antTip=antTip;
+  // lengan (pivot di bahu)
+  function arm(side){
+    const pivot=new THREE.Group();pivot.position.set(side*.36*s,.82*s,0);g.add(pivot);
+    const a=new THREE.Mesh(new THREE.CapsuleGeometry(.09*s,.3*s,4,10),cm);
+    a.position.y=-.2*s;a.castShadow=true;pivot.add(a);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.09*s,10,8),M.skin);
+    hand.position.y=-.4*s;pivot.add(hand);
+    return pivot;
+  }
+  refs.armL=arm(-1);refs.armR=arm(1);
+  // kaki mungil
+  const legG=new THREE.CapsuleGeometry(.1*s,.18*s,4,8);
+  const lL=new THREE.Mesh(legG,M.black);lL.position.set(-.15*s,.14*s,0);g.add(lL);
+  const lR=new THREE.Mesh(legG,M.black);lR.position.set(.15*s,.14*s,0);g.add(lR);
+  // Zzz (tidur)
+  refs.zzz=[];
+  for(let i=0;i<3;i++){
+    const z=symbolSprite('Z','#90e0ef',.5);z.visible=false;z.position.set(.6,2.1+i*.35,.2);
+    z.userData.phase=i*.7;g.add(z);refs.zzz.push(z);
+  }
+  // "?" (error)
+  const q=symbolSprite('?','#ff5964',.8);q.visible=false;q.position.set(0,2.5,0);g.add(q);refs.q=q;
+  // "!" kerja
+  const exc=symbolSprite('!','#52b788',.55);exc.visible=false;exc.position.set(-.75,2.2,0);g.add(exc);refs.exc=exc;
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  return {group:g,refs,s};
+}
 
-                let extraElement = '';
-                if (statusType === 'istirahat') {
-                    extraElement = '<div class="zzz">Z z z</div>';
-                }
+// ===== MEJA + LAPTOP =====
+function makeDesk(w=2.2){
+  const g=new THREE.Group();
+  const top=new THREE.Mesh(new THREE.BoxGeometry(w,.14,1.1),M.wood);
+  top.position.y=.95;top.castShadow=true;top.receiveShadow=true;g.add(top);
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{
+    const leg=new THREE.Mesh(new THREE.BoxGeometry(.12,.95,.12),M.woodDark);
+    leg.position.set(sx*(w/2-.1),.475,sz*.45);leg.castShadow=true;g.add(leg);
+  });
+  // laptop
+  const lap=new THREE.Group();lap.position.set(0,1.02,-.1);lap.rotation.y=Math.PI;g.add(lap);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(.7,.05,.5),
+    new THREE.MeshStandardMaterial({color:0xd3d3d3,roughness:.4}));
+  base.position.y=.03;lap.add(base);
+  const scrMat=new THREE.MeshStandardMaterial({color:0x111111,emissive:0x000000,emissiveIntensity:1});
+  const scr=new THREE.Mesh(new THREE.BoxGeometry(.7,.45,.04),scrMat);
+  scr.position.set(0,.26,-.24);scr.rotation.x=-.25;lap.add(scr);
+  // mug kopi
+  const mug=new THREE.Mesh(new THREE.CylinderGeometry(.09,.075,.16,12),
+    new THREE.MeshStandardMaterial({color:0xf4eee2,roughness:.5}));
+  mug.position.set(w/2-.35,1.1,.25);mug.castShadow=true;g.add(mug);
+  return {group:g,screenMat:scrMat};
+}
 
-                card.innerHTML = `
-                    <div class="model-name">${emp.name}</div>
-                    <div class="character-container">
-                        ${extraElement}
-                        <div class="blob" style="background: ${emp.color};">
-                            <div class="blob-face">
-                                <div class="eye left"></div>
-                                <div class="eye right"></div>
-                                <div class="mouth"></div>
-                            </div>
-                        </div>
-                        <div class="desk-furniture">
-                            <div class="laptop">
-                                <div class="laptop-screen"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="badge-container">
-                        <div class="badge ${badgeClass}">${statusText}</div>
-                        <div class="last-active">${lastActiveStr}</div>
-                    </div>
-                `;
+// ===== SUSUN KANTOR =====
+const actors=[]; // {chibi,desk,scrMat,status,baseY}
+const deskPos=[[-6,-3],[-2,-3],[2,-3],[6,-3],[-4,1],[0,1],[4,1]];
+EMPLOYEES.forEach((emp,i)=>{
+  const [x,z]=deskPos[i];
+  const st=STATUS[emp.id];
+  const d=makeDesk();d.group.position.set(x,0,z);scene.add(d.group);
+  const c=makeChibi(emp.color);
+  c.group.position.set(x,0,z-1.15);scene.add(c.group);
+  const plate=textSprite([emp.name,STATUS_STYLE[st.status].label],
+    {border:STATUS_STYLE[st.status].badge});
+  plate.position.set(x,2.9,z-1.15);scene.add(plate);
+  const last=textSprite([st.last],{bg:'rgba(10,8,8,.7)',border:'#6c757d',fg:'#d3c5b4'});
+  last.scale.set(1.9,.6,1);last.position.set(x,2.28,z-1.15);scene.add(last);
+  actors.push({...c,scrMat:d.screenMat,status:st.status,baseY:0,seed:Math.random()*10});
+});
+// meja manager Remi (lebih besar, di depan)
+{
+  const d=makeDesk(3);d.group.position.set(0,0,6.2);d.group.rotation.y=Math.PI;scene.add(d.group);
+  const remi=makeChibi(0x9b5de5,true);
+  remi.group.position.set(0,0,7.35);remi.group.rotation.y=Math.PI;scene.add(remi.group);
+  const plate=textSprite(['REMI — MANAGER','☕ MENGAWASI'],{border:'#f15bb5',fg2:'#f15bb5'});
+  plate.position.set(0,3.4,7.35);scene.add(plate);
+  actors.push({...remi,scrMat:d.screenMat,status:'kerja',baseY:0,seed:3.3,manager:true});
+}
 
-                grid.appendChild(card);
-            });
-        }
-
-        // Jalankan render saat halaman dimuat
-        renderOffice();
-    </script>
+// ===== ANIMASI =====
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  actors.forEach(a=>{
+    const {refs,s}=a,grp=a.group;
+    // reset umum
+    refs.q.visible=false;refs.exc.visible=false;refs.zzz.forEach(z=>z.visible=false);
+    if(a.status==='kerja'){
+      // ngetik semangat di depan meja
+      grp.position.y=a.baseY+Math.abs(Math.sin(t*4+a.seed))*.06;
+      refs.head.rotation.x=Math.sin(t*4+a.seed)*.06;
+      refs.head.rotation.z=0;
+      refs.armL.rotation.x=-.85+Math.sin(t*11+a.seed)*.3;
+      refs.armR.rotation.x=-.85+Math.sin(t*11+a.seed+Math.PI)*.3;
+      refs.armL.rotation.z=.25;refs.armR.rotation.z=-.25;
+      refs.exc.visible=true;refs.exc.position.y=2.2+Math.sin(t*5)*.08;
+      a.scrMat.emissive.setHex(0x00b4d8);a.scrMat.emissiveIntensity=1.4;
+      refs.antTip.material.emissiveIntensity=1.2;
+      refs.mouth.rotation.x=Math.PI; // senyum
+    }else if(a.status==='limit'){
+      // garuk-garuk kepala kebingungan
+      grp.position.y=a.baseY;
+      grp.rotation.z=Math.sin(t*7+a.seed)*.03;
+      refs.head.rotation.z=.28+Math.sin(t*3+a.seed)*.05;
+      refs.head.rotation.x=0;
+      refs.armL.rotation.x=.2;refs.armL.rotation.z=.35;
+      refs.armR.rotation.z=-2.1+Math.sin(t*9)*.18; // tangan di kepala
+      refs.armR.rotation.x=Math.sin(t*9)*.22;      // garuk-garuk!
+      refs.q.visible=true;
+      const qp=1+Math.sin(t*6)*.15;refs.q.scale.set(.8*qp,.8*qp,1);
+      a.scrMat.emissive.setHex(0xe63946);a.scrMat.emissiveIntensity=1+.6*Math.sin(t*8);
+      refs.mouth.rotation.x=0; // mulut manyun (torus dibalik)
+      refs.mouth.position.y=-.1*s;
+    }else{
+      // istirahat: napas pelan + Zzz
+      grp.position.y=a.baseY;
+      grp.rotation.z=0;
+      const br=1+Math.sin(t*1.6+a.seed)*.025;
+      refs.body.scale.set(1,br,1);
+      refs.head.rotation.x=.38;refs.head.rotation.z=Math.sin(t*1.6+a.seed)*.06;
+      refs.armL.rotation.x=.15;refs.armL.rotation.z=.15;
+      refs.armR.rotation.x=.15;refs.armR.rotation.z=-.15;
+      refs.zzz.forEach(z=>{z.visible=true;
+        const ph=(t*.7+z.userData.phase)%2;
+        z.position.y=2.1+ph*.8;z.material.opacity=1-ph/2;});
+      a.scrMat.emissive.setHex(0x000000);a.scrMat.emissiveIntensity=0;
+      refs.antTip.material.emissiveIntensity=.25;
+    }
+  });
+  controls.update();
+  renderer.render(scene,camera);
+}
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+animate();
+document.getElementById('loading').style.display='none';
+</script>
 </body>
 </html>
